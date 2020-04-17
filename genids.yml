@@ -1,0 +1,9 @@
+##################################基础配置##################################
+base:
+  # 当前服务监听端口
+  server_port: 8090
+  log_max_age: 15
+  log_level: "error"
+  error_log_path: runtime/logs/error-%Y-%m-%d.log
+  sentry_dsn: "https://db8e986e05ba43d2aabaff38035fd30f:950ca588b477486681efe1bebc412ba0@sentry.xxxxx.com/55"
+########################################################################

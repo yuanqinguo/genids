@@ -1,0 +1,11 @@
+/.idea
+
+/go.sum
+/*.exe
+/*.log
+/*.tar.gz
+/main
+/bin
+/test.go
+
+/logs
