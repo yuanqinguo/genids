@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"genids/config"
 	"genids/utils/logs"
+	"github.com/getsentry/sentry-go"
 	"sync"
 	"time"
 )
@@ -37,20 +38,24 @@ type IdWorker struct {
 
 var idw *IdWorker = nil
 
+// 预生产ID的channel队列，最多预生产10W个
+var preGenChn = make(chan int64, 500000)
+
 func GetIdWokrer() *IdWorker {
 	if idw == nil && config.NodeID > -1 && config.NodeID < 3 {
-		tidw, err := NewIdWorker(config.NodeID)
+		tidw, err := newIdWorker(config.NodeID)
 		if err != nil {
 			logs.LogSystem.Errorf("GetIdWorker: %s\n", err.Error())
 		} else {
 			idw = tidw
+			go preGen()
 		}
 	}
 	return idw
 }
 
 // NewIdWorker new a idworker id generator object.
-func NewIdWorker(NodeId int64) (*IdWorker, error) {
+func newIdWorker(NodeId int64) (*IdWorker, error) {
 	idWorker := &IdWorker{}
 	if NodeId > maxNodeId || NodeId < 0 {
 		fmt.Sprintf("NodeId Id can't be greater than %d or less than 0", maxNodeId)
@@ -64,6 +69,30 @@ func NewIdWorker(NodeId int64) (*IdWorker, error) {
 	idWorker.mutex = sync.Mutex{}
 	fmt.Sprintf("worker starting. timestamp left shift %d, worker id bits %d, sequence bits %d, workerid %d", timestampLeftShift, NodeIdBits, sequenceBits, NodeId)
 	return idWorker, nil
+}
+
+func preGen() {
+	defer func() {
+		if err := recover(); err != nil {
+			sentry.CurrentHub().Recover(err)
+			sentry.Flush(time.Second * 3)
+			logs.LogSystem.Error("idworker:pregen:", err)
+		}
+	}()
+	for {
+		if idw != nil {
+			if config.Config.BaseConf.PreGen {
+				id, err := idw.genNextId()
+				if err != nil {
+					logs.LogSystem.Error("idworker:pregen:genNextId:", err)
+				} else {
+					preGenChn <- id
+				}
+			} else {
+				time.Sleep(time.Second * 30)
+			}
+		}
+	}
 }
 
 // timeGen generate a unix millisecond.
@@ -80,18 +109,28 @@ func tilNextMillis(lastTimestamp int64) int64 {
 	return timestamp
 }
 
-// NextId get a idworker id.
-func (id *IdWorker) NextId() (int64, error) {
+func (id *IdWorker) GetNextId() (int64, error) {
+	select {
+	case id := <-preGenChn:
+		return id, nil
+	default:
+		break
+	}
+	return id.genNextId()
+}
+
+// genNextId get a idworker id.
+func (id *IdWorker) genNextId() (int64, error) {
 	id.mutex.Lock()
 	defer id.mutex.Unlock()
 	return id.nextid()
 }
 
-// NextIds get idworker ids.
-func (id *IdWorker) NextIds(num int) ([]int64, error) {
+// genNextIds get idworker ids.
+func (id *IdWorker) genNextIds(num int) ([]int64, error) {
 	if num > maxNextIdsNum || num < 0 {
-		fmt.Sprintf("NextIds num can't be greater than %d or less than 0", maxNextIdsNum)
-		return nil, errors.New(fmt.Sprintf("NextIds num: %d error", num))
+		fmt.Sprintf("genNextIds num can't be greater than %d or less than 0", maxNextIdsNum)
+		return nil, errors.New(fmt.Sprintf("genNextIds num: %d error", num))
 	}
 	ids := make([]int64, num)
 	id.mutex.Lock()

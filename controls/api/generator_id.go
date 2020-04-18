@@ -20,7 +20,7 @@ func IGenSnowId(ctx iris.Context) {
 		SetResp(ctx, "", utils.IDWorkErr, "")
 		return
 	}
-	id, err := idGen.NextId()
+	id, err := idGen.GetNextId()
 	if err != nil {
 		SetResp(ctx, "", utils.NextIdErr, err.Error())
 		return

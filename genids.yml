@@ -4,6 +4,7 @@ base:
   server_port: 8090
   log_max_age: 15
   log_level: "error"
+  pre_gen: true
   error_log_path: runtime/logs/error-%Y-%m-%d.log
   sentry_dsn: "https://db8e986e05ba43d2aabaff38035fd30f:950ca588b477486681efe1bebc412ba0@sentry.xxxxx.com/55"
 ########################################################################

@@ -35,6 +35,8 @@ type BaseConf struct {
 	LogLevel      string `yaml:"log_level"`
 	// Sentry相关配置
 	SentryDSN string `yaml:"sentry_dsn"`
+	// 是否预先生成ID
+	PreGen bool `yaml:"pre_gen"`
 }
 
 // 初始化解析参数
