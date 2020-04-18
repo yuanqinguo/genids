@@ -42,7 +42,7 @@ var idw *IdWorker = nil
 var preGenChn = make(chan int64, 500000)
 
 func GetIdWokrer() *IdWorker {
-	if idw == nil && config.NodeID > -1 && config.NodeID < 3 {
+	if idw == nil && config.NodeID > -1 {
 		tidw, err := newIdWorker(config.NodeID)
 		if err != nil {
 			logs.LogSystem.Errorf("GetIdWorker: %s\n", err.Error())
