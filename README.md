@@ -13,25 +13,6 @@
 
 # 接口
 
-## 初始化接口
-
-```shell
-/genids/init_node
-
-query: nodeid=[0,1,2,3]  nodeid只能为0,1,2,3中的某一个，且全局唯一
-
-curl  http://localhost:8090/genids/init_node?nodeid=0
-
-返回：
-{
-    "errcode": 100, # 100表示成功，其它为失败
-    "errmsg": "OK",
-    "data": ""
-}
-```
-
-
-
 ## ID生成接口
 
 ```shell
