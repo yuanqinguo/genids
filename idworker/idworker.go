@@ -12,7 +12,7 @@ import (
 
 const (
 	twepoch      = int64(1525705533) // 默认起始的时间戳 1449473700000 。计算时，减去这个值
-	NodeIdBits   = uint(2)           //节点 所占位置
+	NodeIdBits   = uint(2)           //节点 所占位置00 01 10 11，对应0， 1， 2， 3
 	sequenceBits = uint(11)          //自增ID 所占用位置
 
 	/*
@@ -42,8 +42,8 @@ var idw *IdWorker = nil
 var preGenChn = make(chan int64, 500000)
 
 func GetIdWokrer() *IdWorker {
-	if idw == nil && config.NodeID > -1 {
-		tidw, err := newIdWorker(config.NodeID)
+	if idw == nil && config.Config.BaseConf.NodeID > -1 {
+		tidw, err := newIdWorker(config.Config.BaseConf.NodeID)
 		if err != nil {
 			logs.LogSystem.Errorf("GetIdWorker: %s\n", err.Error())
 		} else {
@@ -58,7 +58,7 @@ func GetIdWokrer() *IdWorker {
 func newIdWorker(NodeId int64) (*IdWorker, error) {
 	idWorker := &IdWorker{}
 	if NodeId > maxNodeId || NodeId < 0 {
-		fmt.Sprintf("NodeId Id can't be greater than %d or less than 0", maxNodeId)
+		_ = fmt.Sprintf("NodeId Id can't be greater than %d or less than 0", maxNodeId)
 		return nil, errors.New(fmt.Sprintf("NodeId Id: %d error", NodeId))
 	}
 
@@ -67,7 +67,7 @@ func newIdWorker(NodeId int64) (*IdWorker, error) {
 	idWorker.sequence = 0
 	idWorker.twepoch = twepoch
 	idWorker.mutex = sync.Mutex{}
-	fmt.Sprintf("worker starting. timestamp left shift %d, worker id bits %d, sequence bits %d, workerid %d", timestampLeftShift, NodeIdBits, sequenceBits, NodeId)
+	_ = fmt.Sprintf("worker starting. timestamp left shift %d, worker id bits %d, sequence bits %d, workerid %d", timestampLeftShift, NodeIdBits, sequenceBits, NodeId)
 	return idWorker, nil
 }
 
@@ -129,7 +129,7 @@ func (id *IdWorker) genNextId() (int64, error) {
 // genNextIds get idworker ids.
 func (id *IdWorker) genNextIds(num int) ([]int64, error) {
 	if num > maxNextIdsNum || num < 0 {
-		fmt.Sprintf("genNextIds num can't be greater than %d or less than 0", maxNextIdsNum)
+		_ = fmt.Sprintf("genNextIds num can't be greater than %d or less than 0", maxNextIdsNum)
 		return nil, errors.New(fmt.Sprintf("genNextIds num: %d error", num))
 	}
 	ids := make([]int64, num)

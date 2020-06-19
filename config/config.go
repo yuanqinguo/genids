@@ -19,7 +19,6 @@ var CONFIG_KEY = fmt.Sprintf("/configs/dm.sp.%s/system", SERVER_NAME)
 
 var Config *config // 静态配置
 var ConsulAddr string
-var NodeID int64 = -1 // Node ID,只能为 0， 1， 2,
 var _path string
 
 // 静态配置，程序启动后无法再做更改的参数配置
@@ -37,6 +36,8 @@ type BaseConf struct {
 	SentryDSN string `yaml:"sentry_dsn"`
 	// 是否预先生成ID
 	PreGen bool `yaml:"pre_gen"`
+	// 节点ID
+	NodeID int64 `yaml:"node_id"` // Node ID,只能为 0， 1， 2, 3
 }
 
 // 初始化解析参数

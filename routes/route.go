@@ -26,9 +26,7 @@ func InnerRoute(app *iris.Application) {
 	})
 
 	// /genids/getid
-	// /genids/init_node
 	genids := app.Party("/genids")
 	genids.Get("/getid", api.IGenSnowId)
-	genids.Get("/init_node", api.InitNode)
 
 }
